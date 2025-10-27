@@ -16,7 +16,7 @@ class HouseholdCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            TextField::new('name', 'Nazwa'),
+            TextField::new('name', 'Gospodarstwo'),
         ];
     }
 }
