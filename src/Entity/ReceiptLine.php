@@ -8,13 +8,14 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'receipt_line')]
 #[ORM\Index(name: 'idx_line_product', columns: ['product_id'])]
 #[ORM\Index(name: 'idx_line_receipt', columns: ['receipt_id'])]
+#[ORM\HasLifecycleCallbacks]
 class ReceiptLine
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     #[ORM\Column(type: 'uuid', unique: true)]
-    private $id;
+    private ?string $id = null;
     #[ORM\ManyToOne(targetEntity: Receipt::class, inversedBy: 'lines')]
     #[ORM\JoinColumn(nullable: false)]
     private Receipt $receipt;
@@ -25,10 +26,10 @@ class ReceiptLine
     private string $quantity = '1.000';
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $unit = null;
-    #[ORM\Column(type: 'bigint')]
-    private int $unit_price_grosze;
-    #[ORM\Column(type: 'bigint')]
-    private int $line_total_grosze;
+    #[ORM\Column(type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00], name: 'unit_price')]
+    private string $unitPrice = '0.00';
+    #[ORM\Column(type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00], name: 'line_total')]
+    private string $lineTotal = '0.00';
 
     public function getId()
     {
@@ -79,25 +80,50 @@ class ReceiptLine
         return $this;
     }
 
-    public function getUnitPriceGrosze(): int
+    public function getUnitPrice(): float
     {
-        return $this->unit_price_grosze;
+        return (float)$this->unitPrice;
     }
 
-    public function setUnitPriceGrosze(int $v): self
+    public function setUnitPrice($value): self
     {
-        $this->unit_price_grosze = $v;
+        if (is_string($value)) {
+            $value = str_replace([' ', "'", ','], ['', '', '.'], $value);
+        }
+        $v = (float)$value;
+        $this->unitPrice = number_format($v, 2, '.', '');
         return $this;
     }
 
-    public function getLineTotalGrosze(): int
+    public function getLineTotal(): float
     {
-        return $this->line_total_grosze;
+        return (float)$this->lineTotal;
     }
 
-    public function setLineTotalGrosze(int $v): self
+    public function setLineTotal($value): self
     {
-        $this->line_total_grosze = $v;
+        if (is_string($value)) {
+            $value = str_replace([' ', "'", ','], ['', '', '.'], $value);
+        }
+        $v = (float)$value;
+        $this->lineTotal = number_format($v, 2, '.', '');
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function computeLineTotal(): void
+    {
+        // compute using quantity and unitPrice; quantity stored as string decimal
+        $qty = (float)str_replace(',', '.', (string)$this->quantity);
+        $price = (float)$this->unitPrice;
+        $total = $qty * $price;
+        // store as formatted string to match Doctrine decimal mapping
+        $this->lineTotal = number_format($total, 2, '.', '');
+
+        // If linked to a receipt, update its total as well so the header is consistent
+        if (isset($this->receipt) && $this->receipt !== null) {
+            $this->receipt->recalc();
+        }
     }
 }

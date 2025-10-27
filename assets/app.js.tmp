@@ -1,0 +1,59 @@
+import './bootstrap.js';
+import './styles/app.css';
+
+console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+console.log('fallback receipt-line handler active');
+
+(function(){
+    function _parseNumber(val) {
+        if (val === null || val === undefined || val === '') return 0;
+        let s = String(val).trim().replace(/\s+/g, '').replace(/'/g, '');
+        s = s.replace(',', '.');
+        const n = parseFloat(s);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function findRow(el) {
+        if (!el) return null;
+        let cur = el;
+        while (cur && cur !== document.documentElement) {
+            if (cur.id && cur.id.startsWith('Receipt_lines_')) return cur;
+            if (cur.matches && (cur.matches('.ea-collection-item') || cur.matches('.collection-entry') || cur.matches('.form-row'))) return cur;
+            cur = cur.parentElement;
+        }
+        return null;
+    }
+
+    function updateRowFromElement(el) {
+        const row = findRow(el);
+        if (!row) return false;
+        const qtyEl = row.querySelector('.rl-quantity');
+        const priceEl = row.querySelector('.rl-unit-price');
+        const totalEl = row.querySelector('.rl-line-total');
+        if (!qtyEl || !priceEl || !totalEl) return false;
+        const qty = _parseNumber(qtyEl.value);
+        const price = _parseNumber(priceEl.value);
+        totalEl.value = (qty * price).toFixed(2);
+        return true;
+    }
+
+    function updateAllRows() {
+        document.querySelectorAll('.rl-unit-price').forEach(el => updateRowFromElement(el));
+        document.querySelectorAll('.rl-quantity').forEach(el => updateRowFromElement(el));
+    }
+
+    document.addEventListener('input', (e) => {
+        const t = e.target;
+        if (!t) return;
+        if (t.classList && (t.classList.contains('rl-unit-price') || t.classList.contains('rl-quantity'))) {
+            updateRowFromElement(t);
+        }
+    }, {capture: false});
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateAllRows);
+    } else {
+        updateAllRows();
+    }
+})();
+

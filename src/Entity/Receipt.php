@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 #[ORM\Index(name: 'idx_receipt_date', columns: ['purchase_date'])]
 #[ORM\Index(name: 'idx_receipt_household', columns: ['household_id'])]
 #[ORM\Index(name: 'idx_receipt_store', columns: ['store_id'])]
+#[ORM\HasLifecycleCallbacks]
 class Receipt
 {
     #[ORM\Id]
@@ -25,8 +26,8 @@ class Receipt
     private Store $store;
     #[ORM\Column(type: 'date')]
     private \DateTimeInterface $purchase_date;
-    #[ORM\Column(type: 'bigint')]
-    private int $total_amount_grosze = 0;
+    #[ORM\Column(type: 'decimal', precision: 14, scale: 2, options: ['default' => 0.00], name: 'total_amount')]
+    private string $totalAmount = '0.00';
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
     #[ORM\OneToMany(mappedBy: 'receipt', targetEntity: ReceiptLine::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -75,14 +76,18 @@ class Receipt
         return $this;
     }
 
-    public function getTotalAmountGrosze(): int
+    public function getTotalAmount(): float
     {
-        return $this->total_amount_grosze;
+        return (float)$this->totalAmount;
     }
 
-    public function setTotalAmountGrosze(int $v): self
+    public function setTotalAmount($value): self
     {
-        $this->total_amount_grosze = $v;
+        if (is_string($value)) {
+            $value = str_replace(',', '.', $value);
+        }
+        $v = (float)$value;
+        $this->totalAmount = number_format($v, 2, '.', '');
         return $this;
     }
 
@@ -122,11 +127,18 @@ class Receipt
 
     public function recalc(): void
     {
-        $s = 0;
+        $s = 0.0;
         foreach ($this->lines as $l) {
-            $s += $l->getLineTotalGrosze();
+            $s += $l->getLineTotal();
         }
-        $this->total_amount_grosze = $s;
+        $this->totalAmount = number_format($s, 2, '.', '');
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function computeTotalAmount(): void
+    {
+        $this->recalc();
     }
 
     public function __toString(): string

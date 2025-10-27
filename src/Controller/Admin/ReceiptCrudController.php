@@ -8,7 +8,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 final class ReceiptCrudController extends AbstractCrudController
@@ -25,8 +24,8 @@ final class ReceiptCrudController extends AbstractCrudController
         yield DateField::new('purchaseDate', 'Data zakupu')->setRequired(true);
         yield TextField::new('notes', 'Uwagi')->hideOnIndex();
 
-        // Suma nagłówka (gr) – tylko do odczytu na liście; edycję trzymaj po Twojej stronie (liczona z pozycji)
-        yield IntegerField::new('totalAmountGrosze', 'Suma (gr)')
+        // Suma nagłówka (zł) – tylko do odczytu na liście; edycję trzymaj po Twojej stronie (liczona z pozycji)
+        yield TextField::new('totalAmount', 'Suma (zł)')
             ->onlyOnIndex();
 
         // >>> TU JEST “MIEJSCE NA POZYCJE” <<<
@@ -37,6 +36,10 @@ final class ReceiptCrudController extends AbstractCrudController
             ->renderExpanded(true)   // wygodny układ pionowy
             ->setFormTypeOptions([
                 'by_reference' => false, // WYMAGANE, aby działały addLine/removeLine
+                'entry_options' => [
+                    'row_attr' => ['data-controller' => 'receipt-line']
+                ],
+                'attr' => ['data-controller' => 'receipt-line'],
             ])
             ->hideOnIndex()
         ;
