@@ -4,7 +4,7 @@ up:
 	docker compose up -d --build
 
 down:
-	docker compose down -v
+	docker compose down -v --remove-orphans
 
 composer:
 	docker compose exec php-fpm composer install --no-interaction
