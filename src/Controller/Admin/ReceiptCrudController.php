@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 
@@ -27,8 +28,9 @@ final class ReceiptCrudController extends AbstractCrudController
         yield TextField::new('notes', 'Uwagi')->hideOnIndex();
 
         // Suma nagłówka (zł) – tylko do odczytu na liście; edycję trzymaj po Twojej stronie (liczona z pozycji)
-        yield TextField::new('totalAmount', 'Suma (zł)')
-            ->onlyOnIndex();
+        yield NumberField::new('totalAmount', 'Suma (zł)')
+            ->onlyOnIndex()
+            ->setNumDecimals(2);
 
         // >>> TU JEST “MIEJSCE NA POZYCJE” <<<
         yield CollectionField::new('lines', 'Pozycje')
@@ -50,6 +52,7 @@ final class ReceiptCrudController extends AbstractCrudController
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
-            ->addAssetMapperEntry('logname');
+            ->addAssetMapperEntry('logname')
+            ->addAssetMapperEntry('line-total');
     }
 }

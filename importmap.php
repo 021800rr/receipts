@@ -20,6 +20,10 @@ return [
         'path' => './assets/logname.js',
         'entrypoint' => true,
     ],
+    'line-total' => [
+        'path' => './assets/line-total.js',
+        'entrypoint' => true,
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],
