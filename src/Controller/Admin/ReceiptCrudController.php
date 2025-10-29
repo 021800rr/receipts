@@ -10,6 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
+
 final class ReceiptCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -43,5 +45,11 @@ final class ReceiptCrudController extends AbstractCrudController
             ])
             ->hideOnIndex()
         ;
+    }
+
+    public function configureAssets(Assets $assets): Assets
+    {
+        return $assets
+            ->addAssetMapperEntry('logname');
     }
 }
