@@ -10,11 +10,18 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 
 final class ReceiptCrudController extends AbstractCrudController
 {
+    public function configureCrud(Crud $crud): Crud
+    {
+        // property in entity is named $purchase_date (snake_case) - use DB field name here
+        return $crud->setDefaultSort(['purchase_date' => 'DESC']);
+    }
+
     public static function getEntityFqcn(): string
     {
         return Receipt::class;
@@ -24,7 +31,10 @@ final class ReceiptCrudController extends AbstractCrudController
     {
         yield AssociationField::new('household', 'Gospodarstwo')->setRequired(true);
         yield AssociationField::new('store', 'Sklep')->setRequired(true);
-        yield DateField::new('purchaseDate', 'Data zakupu')->setRequired(true);
+        // pole daty - używamy nazwy property encji 'purchase_date' i pozwalamy sortować po tej kolumnie DB
+        yield DateField::new('purchase_date', 'Data zakupu')
+            ->setRequired(true)
+            ->setSortable('purchase_date');
         yield TextField::new('notes', 'Uwagi')->hideOnIndex();
 
         // Suma nagłówka (zł) – tylko do odczytu na liście; edycję trzymaj po Twojej stronie (liczona z pozycji)
