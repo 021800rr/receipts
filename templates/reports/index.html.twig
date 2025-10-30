@@ -1,5 +1,202 @@
-{% extends 'base.html.twig' %}
-{% block title %}Raporty{% endblock %}
-{% block body %}
-    <h2>Raporty</h2>
+{# Przygotuj mapy id->name dla szybkiego odwzorowania #}
+{% set categoryMap = {} %}
+{% for c in categories %}
+    {% set categoryMap = categoryMap|merge({ (c.id ~ ''): c.name }) %}
+{% endfor %}
+{% set productMap = {} %}
+{% for p in products %}
+    {% set productMap = productMap|merge({ (p.id ~ ''): p.name }) %}
+{% endfor %}
+{% set storeMap = {} %}
+{% for s in stores %}
+    {% set storeMap = storeMap|merge({ (s.id ~ ''): s.name }) %}
+{% endfor %}
+{% set householdMap = {} %}
+{% for h in households %}
+    {% set householdMap = householdMap|merge({ (h.id ~ ''): h.name }) %}
+{% endfor %}
+
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% block content %}
+    <table>
+        <tr>
+            <td><h2>Raport</h2></td>
+        </tr>
+        <tr>
+            <td>
+                <form method="get" class="mb-3">
+                    <input type="hidden" name="routeName" value="admin_reports">
+                    <table>
+                        <tr>
+                            <td>
+                                <label>Od<br><input type="date" name="from"
+                                                    value="{{ app.request.get('from') }}"></label>
+                            </td>
+                            <td>
+                                <label>Do<br><input type="date" name="to" value="{{ app.request.get('to') }}"></label>
+                            </td>
+                            <td>
+                                <label>Gospodarstwo<br>
+                                    <select name="household">
+                                        <option value="">-- wszystkie --</option>
+                                        {% for h in households %}
+                                            <option value="{{ h.id }}"
+                                                    {% if app.request.get('household') == (h.id ~ '') %}selected{% endif %}>{{ h.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </td>
+                            <td>
+                                <label>Sklep<br>
+                                    <select name="store">
+                                        <option value="">-- wszystkie --</option>
+                                        {% for s in stores %}
+                                            <option value="{{ s.id }}"
+                                                    {% if app.request.get('store') == (s.id ~ '') %}selected{% endif %}>{{ s.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </td>
+                            <td>
+                                <label>Kategoria<br>
+                                    <select name="category">
+                                        <option value="">-- wszystkie --</option>
+                                        {% for c in categories %}
+                                            <option value="{{ c.id }}"
+                                                    {% if app.request.get('category') == (c.id ~ '') %}selected{% endif %}>{{ c.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </td>
+                            <td>
+                                <label>Produkt<br>
+                                    <select name="product">
+                                        <option value="">-- wszystkie --</option>
+                                        {% for p in products %}
+                                            <option value="{{ p.id }}"
+                                                    {% if app.request.get('product') == (p.id ~ '') %}selected{% endif %}>{{ p.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </td>
+                            <td>
+                                <br>
+                                <button type="submit" class="btn btn-primary">Filtruj</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Całkowita suma</h3>
+                <strong>{{ sum|default(0)|number_format(2, '.', ',') }} {{ app.request.get('currency')|default('PLN') }}</strong>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Wydatki według kategorii</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Kategoria</th>
+                        <th>Suma</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in byCat %}
+                        <tr>
+                            <td>{{ categoryMap[row.category_id ~ '']|default(row.category_id) }}</td>
+                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Brak danych</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Wydatki według sklepu</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Sklep</th>
+                        <th>Suma</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in byStore %}
+                        <tr>
+                            <td>{{ storeMap[row.store_id ~ '']|default(row.store_id) }}</td>
+                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Brak danych</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Top produktów</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Suma</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in byProductTop %}
+                        <tr>
+                            <td>{{ productMap[row.product_id ~ '']|default(row.product_id) }}</td>
+                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Brak danych</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <h3>Porównanie gospodarstw</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Gospodarstwo</th>
+                        <th>Suma</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in compare %}
+                        <tr>
+                            <td>{{ householdMap[row.household_id ~ '']|default(row.household_id) }}</td>
+                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Brak danych</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
 {% endblock %}
