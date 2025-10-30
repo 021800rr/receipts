@@ -35,12 +35,11 @@ final class ReceiptCrudController extends AbstractCrudController
         yield DateField::new('purchase_date', 'Data zakupu')
             ->setRequired(true)
             ->setSortable('purchase_date');
-        yield TextField::new('notes', 'Uwagi')->hideOnIndex();
-
         // Suma nagłówka (zł) – tylko do odczytu na liście; edycję trzymaj po Twojej stronie (liczona z pozycji)
         yield NumberField::new('totalAmount', 'Suma (zł)')
             ->onlyOnIndex()
             ->setNumDecimals(2);
+        yield TextField::new('notes', 'Uwagi');
 
         // >>> TU JEST “MIEJSCE NA POZYCJE” <<<
         yield CollectionField::new('lines', 'Pozycje')
@@ -62,7 +61,6 @@ final class ReceiptCrudController extends AbstractCrudController
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
-            ->addAssetMapperEntry('logname')
             ->addAssetMapperEntry('line-total');
     }
 }

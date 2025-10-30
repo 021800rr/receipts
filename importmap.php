@@ -16,10 +16,6 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
-    'logname' => [
-        'path' => './assets/logname.js',
-        'entrypoint' => true,
-    ],
     'line-total' => [
         'path' => './assets/line-total.js',
         'entrypoint' => true,

@@ -6,7 +6,7 @@ use Doctrine\DBAL\Connection;
 
 class ReportService
 {
-    public function __construct(private Connection $db, private string $currency)
+    public function __construct(private readonly Connection $db)
     {
     }
 
