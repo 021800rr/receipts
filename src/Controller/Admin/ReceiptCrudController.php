@@ -4,6 +4,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\Receipt;
 use App\Form\ReceiptLineType;
+use App\Repository\StoreRepository;
+use Doctrine\ORM\EntityRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
@@ -29,8 +31,22 @@ final class ReceiptCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield AssociationField::new('household', 'Gospodarstwo')->setRequired(true);
-        yield AssociationField::new('store', 'Sklep')->setRequired(true);
+        yield AssociationField::new('household', 'Gospodarstwo')
+            ->setFormTypeOptions([
+                'query_builder' => function (EntityRepository $repo) {
+                    return $repo->createQueryBuilder('p')
+                        ->orderBy('p.name', 'ASC');
+                },
+            ])
+            ->setRequired(true);
+        yield AssociationField::new('store', 'Sklep')
+            ->setFormTypeOptions([
+                'query_builder' => function (EntityRepository $repo) {
+                    return $repo->createQueryBuilder('p')
+                        ->orderBy('p.name', 'ASC');
+                },
+            ])
+            ->setRequired(true);
         // pole daty - używamy nazwy property encji 'purchase_date' i pozwalamy sortować po tej kolumnie DB
         yield DateField::new('purchase_date', 'Data zakupu')
             ->setRequired(true)
@@ -46,16 +62,15 @@ final class ReceiptCrudController extends AbstractCrudController
             ->setEntryType(ReceiptLineType::class)
             ->allowAdd(true)
             ->allowDelete(true)
-            ->renderExpanded(true)   // wygodny układ pionowy
+            ->renderExpanded(true)
             ->setFormTypeOptions([
-                'by_reference' => false, // WYMAGANE, aby działały addLine/removeLine
+                'by_reference' => false,
                 'entry_options' => [
                     'row_attr' => ['data-controller' => 'receipt-line']
                 ],
                 'attr' => ['data-controller' => 'receipt-line'],
             ])
-            ->hideOnIndex()
-        ;
+            ->hideOnIndex();
     }
 
     public function configureAssets(Assets $assets): Assets

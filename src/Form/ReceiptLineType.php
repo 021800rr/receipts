@@ -4,9 +4,10 @@ namespace App\Form;
 
 use App\Entity\Product;
 use App\Entity\ReceiptLine;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,6 +23,10 @@ final class ReceiptLineType extends AbstractType
                 'choice_label' => 'name',
                 'placeholder' => '',
                 'label' => 'Produkt',
+                'query_builder' => function (EntityRepository $productRepository) {
+                    return $productRepository->createQueryBuilder('p')
+                        ->orderBy('p.name', 'ASC');
+                },
                 'attr' => [
                     'class' => 'js-product-select',
                     'data-search-url' => '/admin/api/products',
@@ -33,6 +38,7 @@ final class ReceiptLineType extends AbstractType
                 'label' => 'Ilość',
                 'scale' => 3,
                 'html5' => false,
+                'data' => 1,
                 'attr' => [
                     'class' => 'rl-quantity',
                     'data-receipt-line-target' => 'quantity',
@@ -40,9 +46,18 @@ final class ReceiptLineType extends AbstractType
                 ],
             ])
             // jednostka (opcjonalnie)
-            ->add('unit', TextType::class, [
+            ->add('unit', ChoiceType::class, [
                 'label' => 'Jednostka',
                 'required' => false,
+                'choices' => [
+                    'szt' => 'szt',
+                    'kg'  => 'kg',
+                ],
+                // 'placeholder' => '',
+                'placeholder' => false,
+                'attr' => [
+                    'class' => 'rl-unit-select',
+                ],
             ])
 
             // pola w złotych (mapowane do helperów encji)

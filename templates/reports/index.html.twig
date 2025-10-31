@@ -29,63 +29,86 @@
                     <table>
                         <tr>
                             <td>
-                                <label>Od<br><input type="date" name="from"
-                                                    value="{{ app.request.get('from') }}"></label>
+                                <p style="padding: 10px">
+                                    <label>Od<br>
+                                        <input type="date" name="from" value="{{ app.request.get('from') }}"></label>
+                                </p>
                             </td>
                             <td>
-                                <label>Do<br><input type="date" name="to" value="{{ app.request.get('to') }}"></label>
+                                <p style="padding: 10px">
+                                    <label>Do<br>
+                                        <input type="date" name="to" value="{{ app.request.get('to') }}"></label>
+                                </p>
                             </td>
                             <td>
-                                <label>Gospodarstwo<br>
-                                    <select name="household">
-                                        <option value="">-- wszystkie --</option>
-                                        {% for h in households %}
-                                            <option value="{{ h.id }}"
-                                                    {% if app.request.get('household') == (h.id ~ '') %}selected{% endif %}>{{ h.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </label>
+                                <p style="padding: 10px">
+                                    <label>Gospodarstwo<br>
+                                        <select name="household">
+                                            <option value="">-- wszystkie --</option>
+                                            {% for h in households %}
+                                                <option value="{{ h.id }}"
+                                                        {% if app.request.get('household') == (h.id ~ '') %}selected{% endif %}
+                                                >
+                                                    {{ h.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                </p>
                             </td>
                             <td>
-                                <label>Sklep<br>
-                                    <select name="store">
-                                        <option value="">-- wszystkie --</option>
-                                        {% for s in stores %}
-                                            <option value="{{ s.id }}"
-                                                    {% if app.request.get('store') == (s.id ~ '') %}selected{% endif %}>{{ s.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </label>
+                                <p style="padding: 10px">
+                                    <label>Sklep<br>
+                                        <select name="store">
+                                            <option value="">-- wszystkie --</option>
+                                            {% for s in stores %}
+                                                <option value="{{ s.id }}"
+                                                        {% if app.request.get('store') == (s.id ~ '') %}selected{% endif %}
+                                                >
+                                                    {{ s.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                </p>
                             </td>
                             <td>
-                                <label>Kategoria<br>
-                                    <select name="category">
-                                        <option value="">-- wszystkie --</option>
-                                        {% for c in categories %}
-                                            <option value="{{ c.id }}"
-                                                    {% if app.request.get('category') == (c.id ~ '') %}selected{% endif %}>{{ c.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </label>
+                                <p style="padding: 10px">
+                                    <label>Kategoria<br>
+                                        <select name="category">
+                                            <option value="">-- wszystkie --</option>
+                                            {% for c in categories %}
+                                                <option value="{{ c.id }}"
+                                                        {% if app.request.get('category') == (c.id ~ '') %}selected{% endif %}
+                                                >
+                                                    {{ c.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                </p>
                             </td>
                             <td>
-                                <label>Produkt<br>
-                                    <select name="product">
-                                        <option value="">-- wszystkie --</option>
-                                        {% for p in products %}
-                                            <option value="{{ p.id }}"
-                                                    {% if app.request.get('product') == (p.id ~ '') %}selected{% endif %}>{{ p.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </label>
+                                <p style="padding: 10px">
+                                    <label>Produkt<br>
+                                        <select name="product">
+                                            <option value="">-- wszystkie --</option>
+                                            {% for p in products %}
+                                                <option value="{{ p.id }}"
+                                                        {% if app.request.get('product') == (p.id ~ '') %}selected{% endif %}
+                                                >
+                                                    {{ p.name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+                                </p>
                             </td>
                             <td>
-                                <br>
-                                <button type="submit" class="btn btn-primary">Filtruj</button>
+                                <p style="padding: 10px">
+                                    <br>
+                                    <button type="submit" class="btn btn-primary">Filtruj</button>
+                                </p>
                             </td>
                         </tr>
                     </table>
@@ -104,14 +127,14 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>Kategoria</th>
+                        <th>Kategoria &nbsp;</th>
                         <th>Suma</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for row in byCat %}
                         <tr>
-                            <td>{{ categoryMap[row.category_id ~ '']|default(row.category_id) }}</td>
+                            <td>{{ categoryMap[row.category_id ~ '']|default(row.category_id) }} &nbsp;</td>
                             <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
                         </tr>
                     {% else %}
@@ -129,14 +152,14 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>Sklep</th>
+                        <th>Sklep &nbsp;</th>
                         <th>Suma</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for row in byStore %}
                         <tr>
-                            <td>{{ storeMap[row.store_id ~ '']|default(row.store_id) }}</td>
+                            <td>{{ storeMap[row.store_id ~ '']|default(row.store_id) }} &nbsp;</td>
                             <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
                         </tr>
                     {% else %}
@@ -154,14 +177,14 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>Produkt</th>
+                        <th>Produkt &nbsp;</th>
                         <th>Suma</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for row in byProductTop %}
                         <tr>
-                            <td>{{ productMap[row.product_id ~ '']|default(row.product_id) }}</td>
+                            <td>{{ productMap[row.product_id ~ '']|default(row.product_id) }} &nbsp;</td>
                             <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
                         </tr>
                     {% else %}
@@ -179,14 +202,14 @@
                 <table>
                     <thead>
                     <tr>
-                        <th>Gospodarstwo</th>
+                        <th>Gospodarstwo &nbsp;</th>
                         <th>Suma</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for row in compare %}
                         <tr>
-                            <td>{{ householdMap[row.household_id ~ '']|default(row.household_id) }}</td>
+                            <td>{{ householdMap[row.household_id ~ '']|default(row.household_id) }} &nbsp;</td>
                             <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
                         </tr>
                     {% else %}
