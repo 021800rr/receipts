@@ -8,7 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\ReportService;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 final class DashboardController extends AbstractDashboardController
@@ -24,7 +24,7 @@ final class DashboardController extends AbstractDashboardController
 
     public function index(): Response
     {
-        return $this->render('admin/dashboard.html.twig');
+        return $this->redirect($this->generateUrl('admin_receipt_new'));
     }
 
     public function configureDashboard(): Dashboard
@@ -34,8 +34,6 @@ final class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToDashboard('Panel', 'fa fa-home');
-
         yield MenuItem::section('Słowniki');
         yield MenuItem::linkToCrud('Gospodarstwa', 'fa fa-house', Household::class);
         yield MenuItem::linkToCrud('Sklepy',        'fa fa-store', Store::class);
@@ -44,9 +42,8 @@ final class DashboardController extends AbstractDashboardController
 
         yield MenuItem::section('Paragony');
         yield MenuItem::linkToCrud('Paragony',      'fa fa-receipt', Receipt::class);
-        // Jeśli chcesz jawnie, możesz dodać ->setController(ReceiptCrudController::class)
 
-        yield MenuItem::section('Raporty');
+        yield MenuItem::section('Raport');
         yield MenuItem::linkToRoute('Raporty', 'fa fa-chart-bar', 'admin_reports');
     }
 
