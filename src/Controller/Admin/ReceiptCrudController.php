@@ -61,6 +61,8 @@ final class ReceiptCrudController extends AbstractCrudController
     public function configureAssets(Assets $assets): Assets
     {
         return $assets
+            ->addAssetMapperEntry('app')
+            ->addAssetMapperEntry('product-search')
             ->addAssetMapperEntry('line-total');
     }
 }

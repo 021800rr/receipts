@@ -22,6 +22,11 @@ final class ReceiptLineType extends AbstractType
                 'choice_label' => 'name',
                 'placeholder' => '— wybierz produkt —',
                 'label' => 'Produkt',
+                'attr' => [
+                    'class' => 'js-product-select',
+                    'data-search-url' => '/admin/api/products',
+                    'data-create-url' => '/admin/api/products',
+                ],
             ])
             // ilość (DECIMAL)
             ->add('quantity', NumberType::class, [

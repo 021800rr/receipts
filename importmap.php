@@ -16,6 +16,10 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    'product-search' => [
+        'path' => './assets/product-search.js',
+        'entrypoint' => true,
+    ],
     'line-total' => [
         'path' => './assets/line-total.js',
         'entrypoint' => true,
