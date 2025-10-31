@@ -20,7 +20,7 @@ final class ReceiptLineType extends AbstractType
             ->add('product', EntityType::class, [
                 'class' => Product::class,
                 'choice_label' => 'name',
-                'placeholder' => '— wybierz produkt —',
+                'placeholder' => '',
                 'label' => 'Produkt',
                 'attr' => [
                     'class' => 'js-product-select',

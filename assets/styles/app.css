@@ -1,3 +1,26 @@
 body {
     background-color: inherit;
 }
+
+section.main-content,
+.main-content {background-color: rgb(10,10,10) !important;}
+
+div.ts-control div.item { color: rgb(229, 229, 229); }
+
+div.ts-control input { color: rgb(229, 229, 229); }
+
+div.ts-dropdown.single {
+    background-color: rgb(23, 23, 23);
+    color: rgb(255, 255, 255);
+}
+
+div.ts-dropdown.single .highlight { color: rgb(229, 229, 229); }
+
+.ts-dropdown .active {
+    background-color: rgb(23, 23, 23) !important;
+    color: rgb(229, 229, 229) !important;
+}
+
+.ts-dropdown .create {
+    color: rgba(229, 229, 229, 0.5) !important;
+}

@@ -40,7 +40,7 @@ whenTomSelectReady(function() {
                 modal.style.justifyContent = 'center';
 
                 const box = document.createElement('div');
-                box.style.background = 'white';
+                box.style.background = 'rgb(23, 23, 23)';
                 box.style.padding = '12px';
                 box.style.borderRadius = '6px';
                 box.style.minWidth = '320px';
