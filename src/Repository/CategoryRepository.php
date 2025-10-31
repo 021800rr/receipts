@@ -16,6 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
 class CategoryRepository extends ServiceEntityRepository
 {
     use SaveRemoveTrait;
+    use FindByTermTrait;
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -23,4 +24,3 @@ class CategoryRepository extends ServiceEntityRepository
     }
 
 }
-

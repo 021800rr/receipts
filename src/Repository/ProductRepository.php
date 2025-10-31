@@ -16,19 +16,10 @@ use Doctrine\Persistence\ManagerRegistry;
 class ProductRepository extends ServiceEntityRepository
 {
     use SaveRemoveTrait;
+    use FindByTermTrait;
 
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
     }
-
-    public function findByTerm(string $term): mixed {
-        return $this->createQueryBuilder('p')
-            ->where('LOWER(p.name) LIKE :t')
-            ->setParameter('t', '%'.mb_strtolower((string) $term).'%')
-            ->setMaxResults(50)
-            ->getQuery()
-            ->getResult();
-    }
 }
-
