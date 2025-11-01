@@ -31,13 +31,24 @@ final class ReceiptTotalsSubscriber implements EventSubscriber
         $affectedReceipts = [];
         $linesToRecompute = [];
 
+        // Build a quick lookup of receipts scheduled for deletion in this flush
+        $scheduledReceiptDeletions = [];
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+            if ($entity instanceof Receipt) {
+                $scheduledReceiptDeletions[spl_object_hash($entity)] = true;
+            }
+        }
+
         // 1) Collect affected lines and receipts for INSERT/UPDATE/DELETE
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             if ($entity instanceof ReceiptLine) {
                 $linesToRecompute[] = $entity; // ensure lineTotal is computed and tracked
                 $r = $entity->getReceipt();
                 if ($r instanceof Receipt) {
-                    $affectedReceipts[spl_object_hash($r)] = $r;
+                    $key = spl_object_hash($r);
+                    if (!isset($scheduledReceiptDeletions[$key])) {
+                        $affectedReceipts[$key] = $r;
+                    }
                 }
             }
         }
@@ -46,7 +57,10 @@ final class ReceiptTotalsSubscriber implements EventSubscriber
                 $linesToRecompute[] = $entity; // ensure lineTotal is recomputed and tracked
                 $r = $entity->getReceipt();
                 if ($r instanceof Receipt) {
-                    $affectedReceipts[spl_object_hash($r)] = $r;
+                    $key = spl_object_hash($r);
+                    if (!isset($scheduledReceiptDeletions[$key])) {
+                        $affectedReceipts[$key] = $r;
+                    }
                 }
             }
         }
@@ -54,7 +68,11 @@ final class ReceiptTotalsSubscriber implements EventSubscriber
             if ($entity instanceof ReceiptLine) {
                 $r = $entity->getReceipt();
                 if ($r instanceof Receipt) {
-                    $affectedReceipts[spl_object_hash($r)] = $r;
+                    $key = spl_object_hash($r);
+                    // Only recalc if the parent receipt itself is NOT being deleted
+                    if (!isset($scheduledReceiptDeletions[$key])) {
+                        $affectedReceipts[$key] = $r;
+                    }
                 }
             }
         }
@@ -70,7 +88,10 @@ final class ReceiptTotalsSubscriber implements EventSubscriber
                 // recompute line total using current state
                 $line->computeLineTotal();
                 // and ensure Doctrine tracks this field change in the same flush
-                $uow->recomputeSingleEntityChangeSet($lineMeta, $line);
+                // Skip lines that are being deleted (no need to recompute)
+                if (!isset($scheduledReceiptDeletions[spl_object_hash($line->getReceipt())])) {
+                    $uow->recomputeSingleEntityChangeSet($lineMeta, $line);
+                }
             }
         }
 
@@ -81,6 +102,14 @@ final class ReceiptTotalsSubscriber implements EventSubscriber
         // 3) Recalculate and mark receipts as changed so Doctrine issues UPDATEs
         $receiptMeta = $em->getClassMetadata(Receipt::class);
         foreach ($affectedReceipts as $receipt) {
+            // Recompute only for MANAGED receipts which are not being deleted in this flush
+            $state = $uow->getEntityState($receipt);
+            if ($state !== \Doctrine\ORM\UnitOfWork::STATE_MANAGED) {
+                continue;
+            }
+            if (isset($scheduledReceiptDeletions[spl_object_hash($receipt)])) {
+                continue;
+            }
             $receipt->recalc();
             $uow->recomputeSingleEntityChangeSet($receiptMeta, $receipt);
         }
