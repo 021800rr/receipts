@@ -45,14 +45,11 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: secret
     volumes:
-      - pgadmin-data:/var/lib/pgadmin   # (opcjonalnie: trwałe ustawienia)
+      - ./docker/pgadmin4/data:/var/lib/postgresql/data
     depends_on:
       - db
     networks:
       - receipts-net
-
-volumes:
-  pgadmin-data:
 
 networks:
 

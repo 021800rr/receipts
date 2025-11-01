@@ -1,0 +1,12 @@
+docker/postgres/data
+docker/postgres/backups
+vendor
+node_modules
+var
+.tmp
+.cache
+.git
+.gitignore
+.env
+.env.*
+
