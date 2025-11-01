@@ -18,19 +18,26 @@ class Receipt
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     #[ORM\Column(type: 'uuid', unique: true)]
     private $id;
+    
     #[ORM\ManyToOne(targetEntity: Household::class)]
     #[ORM\JoinColumn(nullable: false)]
     private Household $household;
+    
     #[ORM\ManyToOne(targetEntity: Store::class)]
     #[ORM\JoinColumn(nullable: false)]
     private Store $store;
+    
     #[ORM\Column(type: 'date')]
     private \DateTimeInterface $purchase_date;
+    
     #[ORM\Column(type: 'decimal', precision: 14, scale: 2, options: ['default' => 0.00], name: 'total_amount')]
     private string $totalAmount = '0.00';
+    
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
+    
     #[ORM\OneToMany(mappedBy: 'receipt', targetEntity: ReceiptLine::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['createdAt' => 'ASC'])]
     private $lines;
 
     public function __construct()

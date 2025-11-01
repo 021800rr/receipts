@@ -17,8 +17,8 @@ div.ts-dropdown.single {
 }
 
 /* wybrane literki */
-div.ts-dropdown.single .highlight { color: #A2CEFF; /*#72D4FFFF;*/ }
-/*rgb(229, 229, 229);*/
+div.ts-dropdown.single .highlight { color: #A2CEFF; }
+.ts-dropdown .active:hover .highlight { color: red; }
 
 .ts-dropdown .active {
     background-color: rgb(23, 23, 23) !important;
@@ -33,3 +33,4 @@ div.ts-dropdown.single .highlight { color: #A2CEFF; /*#72D4FFFF;*/ }
 .ts-dropdown .create {
     color: rgba(229, 229, 229, 0.5) !important;
 }
+
