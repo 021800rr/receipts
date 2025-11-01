@@ -16,8 +16,26 @@ final class ReceiptLineType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // If we are creating a new line, suggest default values in the form only for the first render
+        $line = $builder->getData();
+        $isNew = !$line || (method_exists($line, 'getId') && $line->getId() === null);
+
+        $qtyOptions = [
+            'label' => 'Ilość',
+            'scale' => 3,
+            'html5' => false,
+            'attr' => [
+                'class' => 'rl-quantity',
+                'data-receipt-line-target' => 'quantity',
+                'inputmode' => 'decimal',
+            ],
+        ];
+        if ($isNew) {
+            // Show 1 as the initial value when adding a new line
+            $qtyOptions['data'] = 1;
+        }
+
         $builder
-            // produkt (słownik)
             ->add('product', EntityType::class, [
                 'class' => Product::class,
                 'choice_label' => 'name',
@@ -33,19 +51,7 @@ final class ReceiptLineType extends AbstractType
                     'data-create-url' => '/admin/api/products',
                 ],
             ])
-            // ilość (DECIMAL)
-            ->add('quantity', NumberType::class, [
-                'label' => 'Ilość',
-                'scale' => 3,
-                'html5' => false,
-                'data' => 1,
-                'attr' => [
-                    'class' => 'rl-quantity',
-                    'data-receipt-line-target' => 'quantity',
-                    'inputmode' => 'decimal',
-                ],
-            ])
-            // jednostka (opcjonalnie)
+            ->add('quantity', NumberType::class, $qtyOptions)
             ->add('unit', ChoiceType::class, [
                 'label' => 'Jednostka',
                 'required' => false,
@@ -59,7 +65,6 @@ final class ReceiptLineType extends AbstractType
                     'class' => 'rl-unit-select',
                 ],
             ])
-            // pola w złotych (mapowane do helperów encji)
             ->add('unitPrice', NumberType::class, [
                 'label' => 'Cena jedn. (zł)',
                 'scale' => 2,
