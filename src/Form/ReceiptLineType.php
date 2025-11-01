@@ -59,7 +59,6 @@ final class ReceiptLineType extends AbstractType
                     'class' => 'rl-unit-select',
                 ],
             ])
-
             // pola w złotych (mapowane do helperów encji)
             ->add('unitPrice', NumberType::class, [
                 'label' => 'Cena jedn. (zł)',
@@ -75,7 +74,6 @@ final class ReceiptLineType extends AbstractType
                     'placeholder' => 'np. 5,99 lub 5.99',
                 ],
             ])
-
             ->add('lineTotal', NumberType::class, [
                 'label' => 'Wartość pozycji (zł)',
                 'scale' => 2,
@@ -89,8 +87,7 @@ final class ReceiptLineType extends AbstractType
                     'readonly' => 'readonly',
                     'inputmode' => 'decimal',
                 ],
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -4,7 +4,6 @@ namespace App\Controller\Admin;
 
 use App\Entity\Receipt;
 use App\Form\ReceiptLineType;
-use App\Repository\StoreRepository;
 use Doctrine\ORM\EntityRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
@@ -22,7 +21,7 @@ final class ReceiptCrudController extends AbstractCrudController
     {
         return $crud
             //->overrideTemplates(['crud/edit' => 'admin/edit.html.twig',]);
-            ->setDefaultSort(['purchase_date' => 'DESC'])
+            ->setDefaultSort(['purchase_date' => 'DESC']);
     }
 
     public static function getEntityFqcn(): string

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -18,27 +19,27 @@ class Receipt
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     #[ORM\Column(type: 'uuid', unique: true)]
     private $id;
-    
+
     #[ORM\ManyToOne(targetEntity: Household::class)]
     #[ORM\JoinColumn(nullable: false)]
     private Household $household;
-    
+
     #[ORM\ManyToOne(targetEntity: Store::class)]
     #[ORM\JoinColumn(nullable: false)]
     private Store $store;
-    
+
     #[ORM\Column(type: 'date')]
     private \DateTimeInterface $purchase_date;
-    
-    #[ORM\Column(type: 'decimal', precision: 14, scale: 2, options: ['default' => 0.00], name: 'total_amount')]
+
+    #[ORM\Column(name: 'total_amount', type: 'decimal', precision: 14, scale: 2, options: ['default' => 0.00])]
     private string $totalAmount = '0.00';
-    
+
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
-    
-    #[ORM\OneToMany(mappedBy: 'receipt', targetEntity: ReceiptLine::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['createdAt' => 'ASC'])]
-    private $lines;
+
+    #[ORM\OneToMany(targetEntity: ReceiptLine::class, mappedBy: 'receipt', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $lines;
 
     public function __construct()
     {
@@ -114,11 +115,23 @@ class Receipt
         return $this->lines;
     }
 
-    public function addLine(ReceiptLine $l): self
+//    public function addLine(ReceiptLine $l): self
+//    {
+//        if (!$this->lines->contains($l)) {
+//            $this->lines->add($l);
+//            $l->setReceipt($this);
+//            $this->recalc();
+//        }
+//        return $this;
+//    }
+
+    public function addLine(ReceiptLine $line): self
     {
-        if (!$this->lines->contains($l)) {
-            $this->lines->add($l);
-            $l->setReceipt($this);
+        if (!$this->lines->contains($line)) {
+            $line->setReceipt($this);
+            // nadaj kolejną pozycję na końcu
+            $line->setPosition($this->lines->count());
+            $this->lines->add($line);
             $this->recalc();
         }
         return $this;

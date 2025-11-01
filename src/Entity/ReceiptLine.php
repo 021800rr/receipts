@@ -16,29 +16,29 @@ class ReceiptLine
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?string $id = null;
-    
+
     #[ORM\ManyToOne(targetEntity: Receipt::class, inversedBy: 'lines')]
     #[ORM\JoinColumn(nullable: false)]
     private Receipt $receipt;
-    
+
     #[ORM\ManyToOne(targetEntity: Product::class)]
     #[ORM\JoinColumn(nullable: false)]
     private Product $product;
-    
+
     #[ORM\Column(type: 'decimal', precision: 10, scale: 3)]
     private string $quantity = '1.000';
-    
+
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $unit = null;
-    
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00], name: 'unit_price')]
+
+    #[ORM\Column(name: 'unit_price', type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00])]
     private string $unitPrice = '0.00';
-    
-    #[ORM\Column(type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00], name: 'line_total')]
+
+    #[ORM\Column(name: 'line_total', type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00])]
     private string $lineTotal = '0.00';
-    
-    #[ORM\Column(type: 'datetime_immutable', options: ['default' => 'now()'])]
-    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(type: 'integer')]
+    private int $position = 0;
 
     public function getId()
     {
@@ -135,12 +135,15 @@ class ReceiptLine
             $this->receipt->recalc();
         }
     }
-    
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): void
+
+    public function getPosition(): int
     {
-        if ($this->createdAt === null) {
-            $this->createdAt = new \DateTimeImmutable();
-        }
+        return $this->position;
+    }
+
+    public function setPosition(int $p): self
+    {
+        $this->position = $p;
+        return $this;
     }
 }
