@@ -16,5 +16,11 @@ services:
     App\:
         resource: '../src/'
 
+    # Explicitly register Doctrine listener to ensure it's not removed and is wired for ORM onFlush
+    App\EventSubscriber\ReceiptTotalsSubscriber:
+        public: true
+        tags:
+            - { name: 'doctrine.event_listener', event: 'onFlush' }
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

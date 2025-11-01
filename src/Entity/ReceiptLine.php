@@ -129,11 +129,6 @@ class ReceiptLine
         $total = $qty * $price;
         // store as formatted string to match Doctrine decimal mapping
         $this->lineTotal = number_format($total, 2, '.', '');
-
-        // If linked to a receipt, update its total as well so the header is consistent
-        if (isset($this->receipt) && $this->receipt !== null) {
-            $this->receipt->recalc();
-        }
     }
 
     public function getPosition(): int
