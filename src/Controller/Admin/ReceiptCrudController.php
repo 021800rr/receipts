@@ -20,8 +20,9 @@ final class ReceiptCrudController extends AbstractCrudController
 {
     public function configureCrud(Crud $crud): Crud
     {
-        // property in entity is named $purchase_date (snake_case) - use DB field name here
-        return $crud->setDefaultSort(['purchase_date' => 'DESC']);
+        return $crud
+            //->overrideTemplates(['crud/edit' => 'admin/edit.html.twig',]);
+            ->setDefaultSort(['purchase_date' => 'DESC'])
     }
 
     public static function getEntityFqcn(): string

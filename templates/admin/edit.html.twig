@@ -1,0 +1,82 @@
+{# templates/bundles/EasyAdminBundle/crud/includes/_form.html.twig #}
+{% extends '@!EasyAdmin/crud/edit.html.twig' %}
+
+{% block entity_form %}
+  {{ form_start(form) }}
+
+  <div class="ea-form-panel">
+    <table class="table w-100 align-middle">
+      <thead>
+        <tr>
+          {# wiersz etykiet (pomijamy kolekcje) #}
+          {% for child in form %}
+            {% if child.vars.prototype is not defined %}
+              <th>{{ child.vars.label ?? child.vars.name }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        <tr>
+          {# wiersz wartości #}
+          {% for child in form %}
+            {% if child.vars.prototype is not defined %}
+              <td> CCC {{ form_widget(child) }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+  <div class="ea-form-panel mt-4">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          {% set firstLine = form.lines[0] ?? null %}
+          {% if firstLine is not null %}
+            {% for field in firstLine %}
+              <th>{{ field.vars.label ?? field.vars.name }}</th>
+            {% endfor %}
+            <th></th>
+          {% elseif form.lines is defined and form.lines.vars.prototype is defined %}
+            {% for field in form.lines.vars.prototype %}
+              <th>{{ field.vars.label ?? field.vars.name }}</th>
+            {% endfor %}
+            <th></th>
+          {% endif %}
+        </tr>
+      </thead>
+
+      <tbody data-collection-holder data-index="{{ form.lines|length }}">
+        {% for line in form.lines %}
+          <tr>
+            {% for field in line %}
+              <td>{{ form_widget(field) }}</td>
+            {% endfor %}
+            <td><button type="button" class="btn btn-link text-danger" data-remove-line>&times;</button></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="button" class="btn btn-secondary" data-collection-add>+ Dodaj pozycję</button>
+
+    {% if form.lines is defined and form.lines.vars.prototype is defined %}
+      <template data-prototype>
+        <tr>
+          {% for field in form.lines.vars.prototype %}
+            <td>{{ form_widget(field) }}</td>
+          {% endfor %}
+          <td><button type="button" class="btn btn-link text-danger" data-remove-line>&times;</button></td>
+        </tr>
+      </template>
+    {% endif %}
+  </div>
+
+  <div class="ea-form-actions mt-3">
+    {{ include('@EasyAdmin/crud/includes/_form_actions.html.twig') }}
+  </div>
+
+  {{ form_rest(form) }}
+  {{ form_end(form) }}
+{% endblock %}
+
