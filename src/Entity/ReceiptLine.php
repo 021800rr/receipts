@@ -25,14 +25,14 @@ class ReceiptLine
     #[ORM\JoinColumn(nullable: false)]
     private Product $product;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 3)]
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 3, options: ['default' => 1])]
     private string $quantity = '1.000';
 
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $unit = null;
 
-    #[ORM\Column(name: 'unit_price', type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00])]
-    private string $unitPrice = '0.00';
+    #[ORM\Column(name: 'unit_price', type: 'decimal', precision: 12, scale: 2)]
+    private string $unitPrice;
 
     #[ORM\Column(name: 'line_total', type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00])]
     private string $lineTotal = '0.00';

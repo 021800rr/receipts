@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Receipt;
+use App\Entity\ReceiptLine;
 use App\Form\ReceiptLineType;
 use Doctrine\ORM\EntityRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -20,7 +21,6 @@ final class ReceiptCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            //->overrideTemplates(['crud/edit' => 'admin/edit.html.twig',]);
             ->setDefaultSort(['purchase_date' => 'DESC']);
     }
 
@@ -47,17 +47,14 @@ final class ReceiptCrudController extends AbstractCrudController
                 },
             ])
             ->setRequired(true);
-        // pole daty - używamy nazwy property encji 'purchase_date' i pozwalamy sortować po tej kolumnie DB
         yield DateField::new('purchase_date', 'Data zakupu')
             ->setRequired(true)
             ->setSortable('purchase_date');
-        // Suma nagłówka (zł) – tylko do odczytu na liście; edycję trzymaj po Twojej stronie (liczona z pozycji)
         yield NumberField::new('totalAmount', 'Suma (zł)')
             ->onlyOnIndex()
             ->setNumDecimals(2);
         yield TextField::new('notes', 'Uwagi');
 
-        // >>> TU JEST “MIEJSCE NA POZYCJE” <<<
         yield CollectionField::new('lines', 'Pozycje')
             ->setEntryType(ReceiptLineType::class)
             ->allowAdd(true)
@@ -65,6 +62,12 @@ final class ReceiptCrudController extends AbstractCrudController
             ->renderExpanded(true)
             ->setFormTypeOptions([
                 'by_reference' => false,
+                'prototype' => true,
+                'prototype_data' => (function () {
+                    $l = new ReceiptLine();
+                    $l->setQuantity('1.000');
+                    return $l;
+                })(),
                 'entry_options' => [
                     'row_attr' => ['data-controller' => 'receipt-line']
                 ],

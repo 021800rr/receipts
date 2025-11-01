@@ -66,7 +66,6 @@ final class ReceiptLineType extends AbstractType
                     'class' => 'rl-unit-price',
                     'data-receipt-line-target' => 'unitPrice',
                     'inputmode' => 'decimal',
-                    'placeholder' => 'np. 5,99 lub 5.99',
                 ],
             ])
             ->add('lineTotal', NumberType::class, [
