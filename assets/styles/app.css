@@ -1,9 +1,7 @@
-body {
-    background-color: inherit;
-}
+body { background-color: inherit; }
 
-section.main-content,
-.main-content {background-color: rgb(10,10,10) !important;}
+/* tło dla paragonów */
+section.main-content, .main-content {background-color: rgb(10,10,10) !important;}
 
 /* input Gospodarstwo */
 div.ts-control div.item { color: rgb(229, 229, 229); }
@@ -11,6 +9,7 @@ div.ts-control div.item { color: rgb(229, 229, 229); }
 /* input Produkt */
 div.ts-control input { color: rgb(229, 229, 229); }
 
+/* szukajka produkt*/
 div.ts-dropdown.single {
     background-color: rgb(23, 23, 23);
     color: rgb(255, 255, 255);
@@ -18,6 +17,7 @@ div.ts-dropdown.single {
 
 /* wybrane literki */
 div.ts-dropdown.single .highlight { color: #A2CEFF; }
+
 .ts-dropdown .active:hover .highlight { color: red; }
 
 .ts-dropdown .active {
@@ -25,12 +25,14 @@ div.ts-dropdown.single .highlight { color: #A2CEFF; }
     color: rgb(229, 229, 229) !important;
 }
 
-.ts-dropdown .active:hover {
+.ts-dropdown .active:hover, .ts-dropdown-content .option.active  {
     background-color: #A2CEFF !important;
     color: rgb(10,10,10) !important;
 }
 
-.ts-dropdown .create {
-    color: rgba(229, 229, 229, 0.5) !important;
+/* wybrane literki bez hovera */
+.ts-dropdown-content .option.active .highlight {
+    color: red !important;
 }
 
+.ts-dropdown .create { color: rgba(229, 229, 229, 0.5) !important; }
