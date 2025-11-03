@@ -221,5 +221,145 @@
                 </table>
             </td>
         </tr>
+
+        {# Helper do linków sortujących: zmienia 'dir' gdy klikasz ten sam 'sort' #}
+        {% set baseQs = app.request.query.all %}
+        {% macro sortLink(label, key, currentSort, currentDir, baseQs) %}
+            {% set newQs = baseQs|merge({
+                sort: key,
+                dir: (currentSort == key and currentDir == 'asc') ? 'desc' : 'asc',
+                page: 1
+            }) %}
+            <a href="{{ path(app.request.attributes.get('_route'), newQs) }}">
+                {{ label }}
+                {% if currentSort == key %}
+                    {{ currentDir == 'asc' ? '↑' : '↓' }}
+                {% endif %}
+            </a>
+        {% endmacro %}
+        {% import _self as H %}
+
+        <tr>
+            <td>
+                <h3>Wszystkie zakupy</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>{{ H.sortLink('Data',      'purchase_date', sort, dir, baseQs) }}</th>
+                        <th>{{ H.sortLink('Gospod.',   'household',     sort, dir, baseQs) }}</th>
+                        <th>{{ H.sortLink('Sklep',     'store',         sort, dir, baseQs) }}</th>
+                        <th>{{ H.sortLink('Kategoria', 'category',      sort, dir, baseQs) }}</th>
+                        <th>{{ H.sortLink('Produkt',   'product',       sort, dir, baseQs) }}</th>
+                        <th style="text-align:right">{{ H.sortLink('Ilość', 'quantity', sort, dir, baseQs) }}</th>
+                        <th style="text-align:right">{{ H.sortLink('Kwota',  'amount',   sort, dir, baseQs) }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in allPurchases %}
+                        <tr>
+                            <td>{{ r.purchase_date|date('Y-m-d') }}</td>
+                            <td>{{ r.household_name }}</td>
+                            <td>{{ r.store_name }}</td>
+                            <td>{{ r.category_name }}</td>
+                            <td>{{ r.product_name }}</td>
+                            <td style="text-align:right">{{ r.quantity }}</td>
+                            <td style="text-align:right">{{ r.amount|number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="7">Brak danych</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                {# Paginacja #}
+                {% set prevQs = baseQs|merge({page: page > 1 ? page-1 : 1}) %}
+                {% set nextQs = baseQs|merge({page: page + 1}) %}
+                <div style="margin-top:10px; display:flex; gap:10px;">
+                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), prevQs) }}">« Poprzednia</a>
+                    <span>Strona {{ page }}</span>
+                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), nextQs) }}">Następna »</a>
+
+                    <form method="get" style="margin-left:auto;">
+                        {% for k,v in baseQs %}{% if k not in ['limit'] %}
+                            <input type="hidden" name="{{ k }}" value="{{ v }}">
+                        {% endif %}{% endfor %}
+                        <label>Na stronę:
+                            <select name="limit" onchange="this.form.submit()">
+                                {% for n in [25,50,100,200] %}
+                                    <option value="{{ n }}" {% if limit == n %}selected{% endif %}>{{ n }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </form>
+                </div>
+            </td>
+        </tr>
+
+        {# ========= SUMA WG PRODUKTU (BEZ SKLEPU/KATEGORII) ========= #}
+        {% set baseQs = app.request.query.all %}
+        {% macro sortLink2(label, key, currentSort, currentDir, baseQs, sortParam, dirParam, pageParam) %}
+            {% set newQs = baseQs|merge({
+                (sortParam): key,
+                (dirParam): (currentSort == key and currentDir == 'asc') ? 'desc' : 'asc',
+                (pageParam): 1
+            }) %}
+            <a href="{{ path(app.request.attributes.get('_route'), newQs) }}">
+                {{ label }}
+                {% if currentSort == key %}
+                    {{ currentDir == 'asc' ? '↑' : '↓' }}
+                {% endif %}
+            </a>
+        {% endmacro %}
+        {% import _self as H2 %}
+
+        <tr>
+            <td>
+                <h3>Suma wg produktu (bez sklepu/kategorii)</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>{{ H2.sortLink2('Produkt',  'name',     prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
+                        <th style="text-align:right">{{ H2.sortLink2('Ilość',   'quantity', prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
+                        <th style="text-align:right">{{ H2.sortLink2('Suma',    'sum',      prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in byProductAcross %}
+                        <tr>
+                            <td>{{ r.product_name }}</td>
+                            <td style="text-align:right">{{ r.total_quantity }}</td>
+                            <td style="text-align:right">{{ r.sum|number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="3">Brak danych</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                {# Paginacja #}
+                {% set prev2 = baseQs|merge({ prod_page: prod_page > 1 ? prod_page - 1 : 1 }) %}
+                {% set next2 = baseQs|merge({ prod_page: prod_page + 1 }) %}
+                <div style="margin-top:10px; display:flex; gap:10px;">
+                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), prev2) }}">« Poprzednia</a>
+                    <span>Strona {{ prod_page }}</span>
+                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), next2) }}">Następna »</a>
+
+                    <form method="get" style="margin-left:auto;">
+                        {% for k,v in baseQs %}{% if k not in ['prod_limit'] %}
+                            <input type="hidden" name="{{ k }}" value="{{ v }}">
+                        {% endif %}{% endfor %}
+                        <label>Na stronę:
+                            <select name="prod_limit" onchange="this.form.submit()">
+                                {% for n in [25,50,100,200] %}
+                                    <option value="{{ n }}" {% if prod_limit == n %}selected{% endif %}>{{ n }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </form>
+                </div>
+            </td>
+        </tr>
+
+
     </table>
 {% endblock %}
