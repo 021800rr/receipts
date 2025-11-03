@@ -1,43 +1,42 @@
 :root {
-    --root2: rgb(10, 10, 10);           /* bg-main, text-active-hover */
-    --root3: rgb(23, 23, 23);           /* bg-dropdown */
-    --root4: rgb(229, 229, 229);        /* text-primary */
-    --root5: rgba(229, 229, 229, 0.5);  /* text-primary-alpha */
-    --root6: rgb(255, 255, 255);        /* text-dropdown */
-    --root7: rgb(162, 206, 255);        /* highlight, bg-active-hover */
-    --root8: rgb(255, 0, 0);            /* highlight-active */
+    --black: rgb(10, 10, 10);
+    --graphite: rgb(23, 23, 23);
+    --white: rgb(229, 229, 229);
+    --gray: rgba(229, 229, 229, 0.5);
+    --blue: rgb(162, 206, 255);
+    --red: rgb(255, 0, 0);
 }
 
 /* body */
 body {background-color: inherit;}
 
 /* body dla paragonów */
-body .main-content {background-color: var(--root2);}
+.main-content {background-color: var(--black);}
 
 /* literki dla input-ów: Gospodarstwo..., Produkt... */
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-control :is(input, .item) {color: var(--root4);}
-
 /* product dropdown */
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single {
-    background-color: var(--root3);
-    color: var(--root6);
+form:is(.ea-new-form, .ea-edit-form) :is(
+    .ts-control :is(input, .item),
+    .ts-dropdown.single
+) {
+    background-color: var(--graphite);
+    color: var(--white);
 }
 
-/* widget: [product] add NNN... */
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .create {color: var(--root5) !important;}
+/* widget: [product] add NNN... NIE wybrany      */
+.ts-dropdown-content .create {
+    background-color: var(--graphite);
+    color: var(--gray);
+}
+
+/* widget: [product] add NNN... wybrany */
+/* podświetlone opcje select-a */
+.ts-dropdown-content .create.active:hover,
+.ts-dropdown-content .option:is(.active, .active:hover) {
+    background-color: var(--blue);
+    color: var(--graphite);
+}
 
 /* wybrane literki */
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option              .highlight {color: var(--root7);}
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.active:hover .highlight {color: var(--root8);}
-
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .active {background-color: var(--root3);}
-
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .active:hover,
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.active,
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.selected.active {
-    background-color: var(--root7);
-    color: var(--root2);
-}
-
-/* wybrane literki bez hovera */
-body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.active .highlight {color: var(--root8);}
+.ts-dropdown-content .option .highlight {color: var(--blue);}
+.ts-dropdown-content .option:is(.active, .active:hover) .highlight {color: var(--red);}
