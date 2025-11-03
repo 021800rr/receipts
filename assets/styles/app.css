@@ -1,38 +1,45 @@
-body { background-color: inherit; }
+:root {
+    --root2: rgb(10, 10, 10);      /* bg-main, text-active-hover */
+    --root3: rgb(23, 23, 23);      /* bg-dropdown */
+    --root4: rgb(229, 229, 229);   /* text-primary */
+    --root5: rgba(229, 229, 229, 0.5); /* text-primary-alpha */
+    --root6: rgb(255, 255, 255);   /* text-dropdown */
+    --root7: rgb(162, 206, 255);   /* highlight, bg-active-hover */
+    --root8: rgb(255, 0, 0);       /* highlight-active */
+}
 
-/* tło dla paragonów */
-section.main-content, .main-content {background-color: rgb(10,10,10) !important;}
+/* body */
+body {background-color: inherit;}
 
-/* input Gospodarstwo */
-div.ts-control div.item { color: rgb(229, 229, 229); }
+/* body dla paragonów */
+.main-content {background-color: var(--root2) !important;}
 
-/* input Produkt */
-div.ts-control input { color: rgb(229, 229, 229); }
+/* input Gospodarstwo, Produkt */
+.ts-control div.item, .ts-control input {color: var(--root4);}
 
-/* szukajka produkt*/
-div.ts-dropdown.single {
-    background-color: rgb(23, 23, 23);
-    color: rgb(255, 255, 255);
+/* szukajka produkt */
+.ts-dropdown.single {
+    background-color: var(--root3);
+    color: var(--root6);
 }
 
 /* wybrane literki */
-div.ts-dropdown.single .highlight { color: #A2CEFF; }
+.ts-dropdown.single .highlight {color: var(--root7);}
 
-.ts-dropdown .active:hover .highlight { color: red; }
+.ts-dropdown .active:hover .highlight {color: var(--root8);}
 
 .ts-dropdown .active {
-    background-color: rgb(23, 23, 23) !important;
-    color: rgb(229, 229, 229) !important;
+    background-color: var(--root3) !important;
+    color: var(--root4) !important;
 }
 
-.ts-dropdown .active:hover, .ts-dropdown-content .option.active  {
-    background-color: #A2CEFF !important;
-    color: rgb(10,10,10) !important;
+.ts-dropdown .active:hover,
+.ts-dropdown-content .option.active {
+    background-color: var(--root7) !important;
+    color: var(--root2) !important;
 }
 
 /* wybrane literki bez hovera */
-.ts-dropdown-content .option.active .highlight {
-    color: red !important;
-}
+.ts-dropdown-content .option.active .highlight {color: var(--root8) !important;}
 
-.ts-dropdown .create { color: rgba(229, 229, 229, 0.5) !important; }
+.ts-dropdown .create {color: var(--root5) !important;}
