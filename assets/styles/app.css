@@ -1,6 +1,7 @@
 :root {
     --black: rgb(10, 10, 10);
     --graphite: rgb(23, 23, 23);
+    --graphite-light: rgb(45, 45, 45);
     --white: rgb(229, 229, 229);
     --gray: rgba(229, 229, 229, 0.5);
     --blue: rgb(162, 206, 255);
@@ -40,3 +41,20 @@ form:is(.ea-new-form, .ea-edit-form) :is(
 /* wybrane literki */
 .ts-dropdown-content .option .highlight {color: var(--blue);}
 .ts-dropdown-content .option:is(.active, .active:hover) .highlight {color: var(--red);}
+
+/* =======================================
+   ZEBRA: czarny / grafitowy + hover (jaśniejszy grafit)
+   ======================================= */
+
+.reports-table tbody tr:nth-child(odd)  td {
+    background-color: var(--black) !important;
+}
+
+.reports-table tbody tr:nth-child(even) td {
+    background-color: var(--graphite) !important;
+}
+
+.reports-table tbody tr:hover td {
+    background-color: var(--graphite-light) !important;
+}
+

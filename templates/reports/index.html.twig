@@ -1,365 +1,351 @@
-{# Przygotuj mapy id->name dla szybkiego odwzorowania #}
-{% set categoryMap = {} %}
-{% for c in categories %}
-    {% set categoryMap = categoryMap|merge({ (c.id ~ ''): c.name }) %}
-{% endfor %}
-{% set productMap = {} %}
-{% for p in products %}
-    {% set productMap = productMap|merge({ (p.id ~ ''): p.name }) %}
-{% endfor %}
-{% set storeMap = {} %}
-{% for s in stores %}
-    {% set storeMap = storeMap|merge({ (s.id ~ ''): s.name }) %}
-{% endfor %}
-{% set householdMap = {} %}
-{% for h in households %}
-    {% set householdMap = householdMap|merge({ (h.id ~ ''): h.name }) %}
-{% endfor %}
-
 {% extends '@EasyAdmin/page/content.html.twig' %}
+
+{# ✅ WAŻNE: w EasyAdmin używamy head_stylesheets (nie "stylesheets") #}
+{% block head_stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+{% endblock %}
+
 {% block content %}
-    <table>
-        <tr>
-            <td><h2>Raport</h2></td>
-        </tr>
-        <tr>
-            <td>
-                <form method="get" class="mb-3">
-                    <input type="hidden" name="routeName" value="admin_reports">
-                    <table>
-                        <tr>
-                            <td>
-                                <p style="padding: 10px">
-                                    <label>Od<br>
-                                        <input type="date" name="from" value="{{ app.request.get('from') }}"></label>
-                                </p>
-                            </td>
-                            <td>
-                                <p style="padding: 10px">
-                                    <label>Do<br>
-                                        <input type="date" name="to" value="{{ app.request.get('to') }}"></label>
-                                </p>
-                            </td>
-                            <td>
-                                <p style="padding: 10px">
-                                    <label>Gospodarstwo<br>
-                                        <select name="household">
-                                            <option value="">-- wszystkie --</option>
-                                            {% for h in households %}
-                                                <option value="{{ h.id }}"
-                                                        {% if app.request.get('household') == (h.id ~ '') %}selected{% endif %}
-                                                >
-                                                    {{ h.name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </label>
-                                </p>
-                            </td>
-                            <td>
-                                <p style="padding: 10px">
-                                    <label>Sklep<br>
-                                        <select name="store">
-                                            <option value="">-- wszystkie --</option>
-                                            {% for s in stores %}
-                                                <option value="{{ s.id }}"
-                                                        {% if app.request.get('store') == (s.id ~ '') %}selected{% endif %}
-                                                >
-                                                    {{ s.name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </label>
-                                </p>
-                            </td>
-                            <td>
-                                <p style="padding: 10px">
-                                    <label>Kategoria<br>
-                                        <select name="category">
-                                            <option value="">-- wszystkie --</option>
-                                            {% for c in categories %}
-                                                <option value="{{ c.id }}"
-                                                        {% if app.request.get('category') == (c.id ~ '') %}selected{% endif %}
-                                                >
-                                                    {{ c.name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </label>
-                                </p>
-                            </td>
-                            <td>
-                                <p style="padding: 10px">
-                                    <label>Produkt<br>
-                                        <select name="product">
-                                            <option value="">-- wszystkie --</option>
-                                            {% for p in products %}
-                                                <option value="{{ p.id }}"
-                                                        {% if app.request.get('product') == (p.id ~ '') %}selected{% endif %}
-                                                >
-                                                    {{ p.name }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </label>
-                                </p>
-                            </td>
-                            <td>
-                                <p style="padding: 10px">
-                                    <br>
-                                    <button type="submit" class="btn btn-primary">Filtruj</button>
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
+    {# Mapy id->name #}
+    {% set categoryMap = {} %}
+    {% for c in categories %}
+        {% set categoryMap = categoryMap|merge({ (c.id ~ ''): c.name }) %}
+    {% endfor %}
+    {% set productMap = {} %}
+    {% for p in products %}
+        {% set productMap = productMap|merge({ (p.id ~ ''): p.name }) %}
+    {% endfor %}
+    {% set storeMap = {} %}
+    {% for s in stores %}
+        {% set storeMap = storeMap|merge({ (s.id ~ ''): s.name }) %}
+    {% endfor %}
+    {% set householdMap = {} %}
+    {% for h in households %}
+        {% set householdMap = householdMap|merge({ (h.id ~ ''): h.name }) %}
+    {% endfor %}
+
+    {# Makra sortowania #}
+    {% import _self as Sort %}
+    {% macro sortLink(label, key, currentSort, currentDir, baseQs) %}
+        {% set newQs = baseQs|merge({
+            sort: key,
+            dir: (currentSort == key and currentDir == 'asc') ? 'desc' : 'asc',
+            page: 1
+        }) %}
+        <a href="{{ path(app.request.attributes.get('_route'), newQs) }}">
+            {{ label }}
+            {% if currentSort == key %}
+                {{ currentDir == 'asc' ? '↑' : '↓' }}
+            {% endif %}
+        </a>
+    {% endmacro %}
+    {% macro sortLink2(label, key, currentSort, currentDir, baseQs, sortParam, dirParam, pageParam) %}
+        {% set newQs = baseQs|merge({
+            (sortParam): key,
+            (dirParam): (currentSort == key and currentDir == 'asc') ? 'desc' : 'asc',
+            (pageParam): 1
+        }) %}
+        <a href="{{ path(app.request.attributes.get('_route'), newQs) }}">
+            {{ label }}
+            {% if currentSort == key %}
+                {{ currentDir == 'asc' ? '↑' : '↓' }}
+            {% endif %}
+        </a>
+    {% endmacro %}
+
+    {% set baseQs = app.request.query.all %}
+
+    <div class="reports-wrapper">
+        <h2>Raport</h2>
+
+        {# ----------------------- FILTRY ----------------------- #}
+        <form method="get" class="reports-filter-form">
+            <input type="hidden" name="routeName" value="admin_reports">
+            <table>
+                <tr>
+                    <td>
+                        <label>Od<br>
+                            <input type="date" name="from" value="{{ app.request.get('from') }}">
+                        </label>
+                        &nbsp; &nbsp;
+                    </td>
+                    <td>
+                        <label>Do<br>
+                            <input type="date" name="to" value="{{ app.request.get('to') }}">
+                        </label>
+                        &nbsp; &nbsp;
+                    </td>
+                    <td>
+                        <label>Gospodarstwo<br>
+                            <select name="household">
+                                <option value="">-- wszystkie --</option>
+                                {% for h in households %}
+                                    <option value="{{ h.id }}"
+                                            {% if app.request.get('household') == (h.id ~ '') %}selected{% endif %}>
+                                        {{ h.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        &nbsp; &nbsp;
+                    </td>
+                    <td>
+                        <label>Sklep<br>
+                            <select name="store">
+                                <option value="">-- wszystkie --</option>
+                                {% for s in stores %}
+                                    <option value="{{ s.id }}"
+                                            {% if app.request.get('store') == (s.id ~ '') %}selected{% endif %}>
+                                        {{ s.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        &nbsp; &nbsp;
+                    </td>
+                    <td>
+                        <label>Kategoria<br>
+                            <select name="category">
+                                <option value="">-- wszystkie --</option>
+                                {% for c in categories %}
+                                    <option value="{{ c.id }}"
+                                            {% if app.request.get('category') == (c.id ~ '') %}selected{% endif %}>
+                                        {{ c.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        &nbsp; &nbsp;
+                    </td>
+                    <td>
+                        <label>Produkt<br>
+                            <select name="product">
+                                <option value="">-- wszystkie --</option>
+                                {% for p in products %}
+                                    <option value="{{ p.id }}"
+                                            {% if app.request.get('product') == (p.id ~ '') %}selected{% endif %}>
+                                        {{ p.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        &nbsp; &nbsp;
+                    </td>
+                    <td>
+                        <br>
+                        <button type="submit" class="btn btn-primary">Filtruj</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        {# ----------------------- SUMA ----------------------- #}
+        <h3>Całkowita suma</h3>
+        <p class="reports-total">
+            <strong>{{ sum|default(0)|number_format(2, '.', ',') }} PLN</strong>
+        </p>
+
+        {# ----------------------- Wg kategorii ----------------------- #}
+        <h3>Wydatki według kategorii</h3>
+        <table class="reports-table">
+            <thead>
+            <tr>
+                <th>Kategoria</th>
+                <th class="text-right">Suma</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in byCat %}
+                <tr>
+                    <td>{{ categoryMap[row.category_id ~ '']|default(row.category_id) }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="2">Brak danych</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {# ----------------------- Wg sklepu ----------------------- #}
+        <h3>Wydatki według sklepu</h3>
+        <table class="reports-table">
+            <thead>
+            <tr>
+                <th>Sklep</th>
+                <th class="text-right">Suma</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in byStore %}
+                <tr>
+                    <td>{{ storeMap[row.store_id ~ '']|default(row.store_id) }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="2">Brak danych</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {# ----------------------- Top produktów ----------------------- #}
+        <h3>Top produktów</h3>
+        <table class="reports-table">
+            <thead>
+            <tr>
+                <th>Produkt</th>
+                <th class="text-right">Suma</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in byProductTop %}
+                <tr>
+                    <td>{{ productMap[row.product_id ~ '']|default(row.product_id) }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="2">Brak danych</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {# ----------------------- Porównanie gospodarstw ----------------------- #}
+        <h3>Porównanie gospodarstw</h3>
+        <table class="reports-table">
+            <thead>
+            <tr>
+                <th>Gospodarstwo</th>
+                <th class="text-right">Suma</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in compare %}
+                <tr>
+                    <td>{{ householdMap[row.household_id ~ '']|default(row.household_id) }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ row.sum|number_format(2, '.', ',') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="2">Brak danych</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {# ----------------------- Wszystkie zakupy ----------------------- #}
+        <h3>Wszystkie zakupy</h3>
+        <table class="reports-table">
+            <thead>
+            <tr>
+                <th>{{ Sort.sortLink('Data', 'purchase_date', sort, dir, baseQs) }}</th>
+                <th>{{ Sort.sortLink('Gospodarstwo', 'household', sort, dir, baseQs) }}</th>
+                <th>{{ Sort.sortLink('Sklep', 'store', sort, dir, baseQs) }}</th>
+                <th>{{ Sort.sortLink('Kategoria', 'category', sort, dir, baseQs) }}</th>
+                <th>{{ Sort.sortLink('Produkt', 'product', sort, dir, baseQs) }}</th>
+                <th class="text-right">{{ Sort.sortLink('Ilość', 'quantity', sort, dir, baseQs) }}</th>
+                <th class="text-right">{{ Sort.sortLink('Kwota', 'amount', sort, dir, baseQs) }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for r in allPurchases %}
+                <tr>
+                    <td>{{ r.purchase_date|date('Y-m-d') }} &nbsp; &nbsp; </td>
+                    <td>{{ r.household_name }} &nbsp; &nbsp; </td>
+                    <td>{{ r.store_name }} &nbsp; &nbsp; </td>
+                    <td>{{ r.category_name }} &nbsp; &nbsp; </td>
+                    <td>{{ r.product_name }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ r.quantity }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ r.amount|number_format(2, '.', ',') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7">Brak danych</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {# Paginacja + Ilość/strona dla "Wszystkie zakupy" #}
+        {% set prevQs = baseQs|merge({ page: page > 1 ? page - 1 : 1 }) %}
+        {% set nextQs = baseQs|merge({ page: page + 1 }) %}
+        <div class="reports-pagination">
+            <div>
+                <a class="btn" href="{{ path(app.request.attributes.get('_route'), prevQs) }}">« Poprzednia</a>
+                <span>Strona {{ page }}</span>
+                <a class="btn" href="{{ path(app.request.attributes.get('_route'), nextQs) }}">Następna »</a>
+            </div>
+            <div>
+                <form method="get" class="reports-page-size">
+                    {% for k,v in baseQs %}
+                        {% if k not in ['limit'] %}
+                            <input type="hidden" name="{{ k }}" value="{{ v }}">
+                        {% endif %}
+                    {% endfor %}
+                    <label>Ilość na stronę:</label>
+                    <select name="limit" onchange="this.form.submit()">
+                        {% for n in [25,50,100,200] %}
+                            <option value="{{ n }}" {% if limit == n %}selected{% endif %}>{{ n }}</option>
+                        {% endfor %}
+                    </select>
                 </form>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <h3>Całkowita suma</h3>
-                <strong>{{ sum|default(0)|number_format(2, '.', ',') }} {{ app.request.get('currency')|default('PLN') }}</strong>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <h3>Wydatki według kategorii</h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Kategoria &nbsp;</th>
-                        <th>Suma</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in byCat %}
-                        <tr>
-                            <td>{{ categoryMap[row.category_id ~ '']|default(row.category_id) }} &nbsp;</td>
-                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="2">Brak danych</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <h3>Wydatki według sklepu</h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Sklep &nbsp;</th>
-                        <th>Suma</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in byStore %}
-                        <tr>
-                            <td>{{ storeMap[row.store_id ~ '']|default(row.store_id) }} &nbsp;</td>
-                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="2">Brak danych</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <h3>Top produktów</h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Produkt &nbsp;</th>
-                        <th>Suma</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in byProductTop %}
-                        <tr>
-                            <td>{{ productMap[row.product_id ~ '']|default(row.product_id) }} &nbsp;</td>
-                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="2">Brak danych</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <h3>Porównanie gospodarstw</h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Gospodarstwo &nbsp;</th>
-                        <th>Suma</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in compare %}
-                        <tr>
-                            <td>{{ householdMap[row.household_id ~ '']|default(row.household_id) }} &nbsp;</td>
-                            <td style="text-align:right">{{ row.sum|number_format(2, '.', ',') }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="2">Brak danych</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </td>
-        </tr>
+            </div>
+        </div>
 
-        {# Helper do linków sortujących: zmienia 'dir' gdy klikasz ten sam 'sort' #}
-        {% set baseQs = app.request.query.all %}
-        {% macro sortLink(label, key, currentSort, currentDir, baseQs) %}
-            {% set newQs = baseQs|merge({
-                sort: key,
-                dir: (currentSort == key and currentDir == 'asc') ? 'desc' : 'asc',
-                page: 1
-            }) %}
-            <a href="{{ path(app.request.attributes.get('_route'), newQs) }}">
-                {{ label }}
-                {% if currentSort == key %}
-                    {{ currentDir == 'asc' ? '↑' : '↓' }}
-                {% endif %}
-            </a>
-        {% endmacro %}
-        {% import _self as H %}
+        {# ----------------------- Suma wg produktu (bez sklepu/kategorii) ----------------------- #}
+        <h3>Suma wg produktu (bez sklepu/kategorii)</h3>
+        <table class="reports-table">
+            <thead>
+            <tr>
+                <th>{{ Sort.sortLink2('Produkt', 'name',       prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
+                <th class="text-right">{{ Sort.sortLink2('Ilość', 'quantity',  prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
+                <th class="text-right">{{ Sort.sortLink2('Suma',  'sum',       prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for r in byProductAcross %}
+                <tr>
+                    <td>{{ r.product_name }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ r.total_quantity }} &nbsp; &nbsp; </td>
+                    <td class="text-right">{{ r.sum|number_format(2, '.', ',') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="3">Brak danych</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
 
-        <tr>
-            <td>
-                <h3>Wszystkie zakupy</h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>{{ H.sortLink('Data',      'purchase_date', sort, dir, baseQs) }}</th>
-                        <th>{{ H.sortLink('Gospod.',   'household',     sort, dir, baseQs) }}</th>
-                        <th>{{ H.sortLink('Sklep',     'store',         sort, dir, baseQs) }}</th>
-                        <th>{{ H.sortLink('Kategoria', 'category',      sort, dir, baseQs) }}</th>
-                        <th>{{ H.sortLink('Produkt',   'product',       sort, dir, baseQs) }}</th>
-                        <th style="text-align:right">{{ H.sortLink('Ilość', 'quantity', sort, dir, baseQs) }}</th>
-                        <th style="text-align:right">{{ H.sortLink('Kwota',  'amount',   sort, dir, baseQs) }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for r in allPurchases %}
-                        <tr>
-                            <td>{{ r.purchase_date|date('Y-m-d') }}</td>
-                            <td>{{ r.household_name }}</td>
-                            <td>{{ r.store_name }}</td>
-                            <td>{{ r.category_name }}</td>
-                            <td>{{ r.product_name }}</td>
-                            <td style="text-align:right">{{ r.quantity }}</td>
-                            <td style="text-align:right">{{ r.amount|number_format(2, '.', ',') }}</td>
-                        </tr>
-                    {% else %}
-                        <tr><td colspan="7">Brak danych</td></tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-
-                {# Paginacja #}
-                {% set prevQs = baseQs|merge({page: page > 1 ? page-1 : 1}) %}
-                {% set nextQs = baseQs|merge({page: page + 1}) %}
-                <div style="margin-top:10px; display:flex; gap:10px;">
-                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), prevQs) }}">« Poprzednia</a>
-                    <span>Strona {{ page }}</span>
-                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), nextQs) }}">Następna »</a>
-
-                    <form method="get" style="margin-left:auto;">
-                        {% for k,v in baseQs %}{% if k not in ['limit'] %}
+        {# Paginacja + Ilość/strona dla "Suma wg produktu" #}
+        {% set prev2 = baseQs|merge({ prod_page: prod_page > 1 ? prod_page - 1 : 1 }) %}
+        {% set next2 = baseQs|merge({ prod_page: prod_page + 1 }) %}
+        <div class="reports-pagination">
+            <div>
+                <a class="btn" href="{{ path(app.request.attributes.get('_route'), prev2) }}">« Poprzednia</a>
+                <span>Strona {{ prod_page }}</span>
+                <a class="btn" href="{{ path(app.request.attributes.get('_route'), next2) }}">Następna »</a>
+            </div>
+            <div>
+                <form method="get" class="reports-page-size">
+                    {% for k,v in baseQs %}
+                        {% if k not in ['prod_limit'] %}
                             <input type="hidden" name="{{ k }}" value="{{ v }}">
-                        {% endif %}{% endfor %}
-                        <label>Na stronę:
-                            <select name="limit" onchange="this.form.submit()">
-                                {% for n in [25,50,100,200] %}
-                                    <option value="{{ n }}" {% if limit == n %}selected{% endif %}>{{ n }}</option>
-                                {% endfor %}
-                            </select>
-                        </label>
-                    </form>
-                </div>
-            </td>
-        </tr>
-
-        {# ========= SUMA WG PRODUKTU (BEZ SKLEPU/KATEGORII) ========= #}
-        {% set baseQs = app.request.query.all %}
-        {% macro sortLink2(label, key, currentSort, currentDir, baseQs, sortParam, dirParam, pageParam) %}
-            {% set newQs = baseQs|merge({
-                (sortParam): key,
-                (dirParam): (currentSort == key and currentDir == 'asc') ? 'desc' : 'asc',
-                (pageParam): 1
-            }) %}
-            <a href="{{ path(app.request.attributes.get('_route'), newQs) }}">
-                {{ label }}
-                {% if currentSort == key %}
-                    {{ currentDir == 'asc' ? '↑' : '↓' }}
-                {% endif %}
-            </a>
-        {% endmacro %}
-        {% import _self as H2 %}
-
-        <tr>
-            <td>
-                <h3>Suma wg produktu (bez sklepu/kategorii)</h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>{{ H2.sortLink2('Produkt',  'name',     prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
-                        <th style="text-align:right">{{ H2.sortLink2('Ilość',   'quantity', prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
-                        <th style="text-align:right">{{ H2.sortLink2('Suma',    'sum',      prod_sort, prod_dir, baseQs, 'prod_sort', 'prod_dir', 'prod_page') }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for r in byProductAcross %}
-                        <tr>
-                            <td>{{ r.product_name }}</td>
-                            <td style="text-align:right">{{ r.total_quantity }}</td>
-                            <td style="text-align:right">{{ r.sum|number_format(2, '.', ',') }}</td>
-                        </tr>
-                    {% else %}
-                        <tr><td colspan="3">Brak danych</td></tr>
+                        {% endif %}
                     {% endfor %}
-                    </tbody>
-                </table>
-
-                {# Paginacja #}
-                {% set prev2 = baseQs|merge({ prod_page: prod_page > 1 ? prod_page - 1 : 1 }) %}
-                {% set next2 = baseQs|merge({ prod_page: prod_page + 1 }) %}
-                <div style="margin-top:10px; display:flex; gap:10px;">
-                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), prev2) }}">« Poprzednia</a>
-                    <span>Strona {{ prod_page }}</span>
-                    <a class="btn" href="{{ path(app.request.attributes.get('_route'), next2) }}">Następna »</a>
-
-                    <form method="get" style="margin-left:auto;">
-                        {% for k,v in baseQs %}{% if k not in ['prod_limit'] %}
-                            <input type="hidden" name="{{ k }}" value="{{ v }}">
-                        {% endif %}{% endfor %}
-                        <label>Na stronę:
-                            <select name="prod_limit" onchange="this.form.submit()">
-                                {% for n in [25,50,100,200] %}
-                                    <option value="{{ n }}" {% if prod_limit == n %}selected{% endif %}>{{ n }}</option>
-                                {% endfor %}
-                            </select>
-                        </label>
-                    </form>
-                </div>
-            </td>
-        </tr>
-
-
-    </table>
+                    <label>Ilość na stronę:</label>
+                    <select name="prod_limit" onchange="this.form.submit()">
+                        {% for n in [25,50,100,200] %}
+                            <option value="{{ n }}" {% if prod_limit == n %}selected{% endif %}>{{ n }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock %}
