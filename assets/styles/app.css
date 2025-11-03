@@ -12,35 +12,32 @@
 body {background-color: inherit;}
 
 /* body dla paragonów */
-.main-content {background-color: var(--root2) !important;}
+body .main-content {background-color: var(--root2);}
 
-/* literki dla input-ów: Gospodarstwo..., Produkt... (.ts-control input#Receipt_lines_{0-N}_product-ts-control) */
-.ts-control .item, .ts-control input {color: var(--root4);}
+/* literki dla input-ów: Gospodarstwo..., Produkt... */
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-control :is(input, .item) {color: var(--root4);}
 
-/* ------------------------------------------------------------------------------------------------------------------ */
 /* product dropdown */
-.ts-dropdown.single {
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single {
     background-color: var(--root3);
     color: var(--root6);
 }
 
+/* widget: [product] add NNN... */
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .create {color: var(--root5) !important;}
+
 /* wybrane literki */
-.ts-dropdown.single .ts-dropdown-content .option              .highlight {color: var(--root7);}
-.ts-dropdown.single .ts-dropdown-content .option.active:hover .highlight {color: var(--root8);}
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option              .highlight {color: var(--root7);}
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.active:hover .highlight {color: var(--root8);}
 
-.ts-dropdown.single .ts-dropdown-content .active {
-    background-color: var(--root3) !important;
-}
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .active {background-color: var(--root3);}
 
-.ts-dropdown.single .active:hover,
-.ts-dropdown.single .ts-dropdown-content .option.active,
-.ts-dropdown.single .ts-dropdown-content .option.selected.active
-{
-    background-color: var(--root7) !important;
-    color: var(--root2) !important;
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .active:hover,
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.active,
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.selected.active {
+    background-color: var(--root7);
+    color: var(--root2);
 }
 
 /* wybrane literki bez hovera */
-.ts-dropdown.single .ts-dropdown-content .option.active .highlight {color: var(--root8) !important;}
-
-.ts-dropdown.single .create {color: var(--root5) !important;}
+body .main-content form:is(.ea-new-form, .ea-edit-form) .form-select .ts-dropdown.single .ts-dropdown-content .option.active .highlight {color: var(--root8);}
