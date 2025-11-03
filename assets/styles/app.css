@@ -1,11 +1,11 @@
 :root {
-    --root2: rgb(10, 10, 10);      /* bg-main, text-active-hover */
-    --root3: rgb(23, 23, 23);      /* bg-dropdown */
-    --root4: rgb(229, 229, 229);   /* text-primary */
-    --root5: rgba(229, 229, 229, 0.5); /* text-primary-alpha */
-    --root6: rgb(255, 255, 255);   /* text-dropdown */
-    --root7: rgb(162, 206, 255);   /* highlight, bg-active-hover */
-    --root8: rgb(255, 0, 0);       /* highlight-active */
+    --root2: rgb(10, 10, 10);           /* bg-main, text-active-hover */
+    --root3: rgb(23, 23, 23);           /* bg-dropdown */
+    --root4: rgb(229, 229, 229);        /* text-primary */
+    --root5: rgba(229, 229, 229, 0.5);  /* text-primary-alpha */
+    --root6: rgb(255, 255, 255);        /* text-dropdown */
+    --root7: rgb(162, 206, 255);        /* highlight, bg-active-hover */
+    --root8: rgb(255, 0, 0);            /* highlight-active */
 }
 
 /* body */
@@ -14,32 +14,33 @@ body {background-color: inherit;}
 /* body dla paragonów */
 .main-content {background-color: var(--root2) !important;}
 
-/* input Gospodarstwo, Produkt */
-.ts-control div.item, .ts-control input {color: var(--root4);}
+/* literki dla input-ów: Gospodarstwo..., Produkt... (.ts-control input#Receipt_lines_{0-N}_product-ts-control) */
+.ts-control .item, .ts-control input {color: var(--root4);}
 
-/* szukajka produkt */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* product dropdown */
 .ts-dropdown.single {
     background-color: var(--root3);
     color: var(--root6);
 }
 
 /* wybrane literki */
-.ts-dropdown.single .highlight {color: var(--root7);}
+.ts-dropdown.single .ts-dropdown-content .option              .highlight {color: var(--root7);}
+.ts-dropdown.single .ts-dropdown-content .option.active:hover .highlight {color: var(--root8);}
 
-.ts-dropdown .active:hover .highlight {color: var(--root8);}
-
-.ts-dropdown .active {
+.ts-dropdown.single .ts-dropdown-content .active {
     background-color: var(--root3) !important;
-    color: var(--root4) !important;
 }
 
-.ts-dropdown .active:hover,
-.ts-dropdown-content .option.active {
+.ts-dropdown.single .active:hover,
+.ts-dropdown.single .ts-dropdown-content .option.active,
+.ts-dropdown.single .ts-dropdown-content .option.selected.active
+{
     background-color: var(--root7) !important;
     color: var(--root2) !important;
 }
 
 /* wybrane literki bez hovera */
-.ts-dropdown-content .option.active .highlight {color: var(--root8) !important;}
+.ts-dropdown.single .ts-dropdown-content .option.active .highlight {color: var(--root8) !important;}
 
-.ts-dropdown .create {color: var(--root5) !important;}
+.ts-dropdown.single .create {color: var(--root5) !important;}
