@@ -32,11 +32,11 @@ form:is(.ea-new-form, .ea-edit-form) :is(
 /* widget: [product] add NNN... wybrany */
 /* podświetlone opcje select-a */
 .ts-dropdown-content .create.active:hover,
-.option:is(.active, .active:hover) {
+.ts-dropdown-content .option:is(.active, .active:hover) {
     background-color: var(--blue);
     color: var(--graphite);
 }
 
 /* wybrane literki */
-.option .highlight {color: var(--blue) !important;}
-.option:is(.active, .active:hover) .highlight {color: var(--red) !important;}
+.ts-dropdown-content .option .highlight {color: var(--blue);}
+.ts-dropdown-content .option:is(.active, .active:hover) .highlight {color: var(--red);}
