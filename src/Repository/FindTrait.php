@@ -2,7 +2,12 @@
 
 namespace App\Repository;
 
-trait FindByTermTrait
+use App\Entity\Category;
+use App\Entity\Household;
+use App\Entity\Product;
+use App\Entity\Store;
+
+trait FindTrait
 {
     public function findByTerm(string $term): mixed {
         return $this->createQueryBuilder('p')
@@ -11,5 +16,11 @@ trait FindByTermTrait
             ->setMaxResults(50)
             ->getQuery()
             ->getResult();
+    }
+
+    /** @return Category[]|Household[]|Product[]|Store[] */
+    public function findAll(): array
+    {
+        return $this->findBy([], ['name' => 'ASC']);
     }
 }

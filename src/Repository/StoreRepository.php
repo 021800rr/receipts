@@ -10,13 +10,11 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<Store>
  * @method Store|null find($id, $lockMode = null, $lockVersion = null)
  * @method Store|null findOneBy(array $criteria, array $orderBy = null)
- * @method Store[]    findAll()
  * @method Store[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class StoreRepository extends ServiceEntityRepository
 {
-//    use SaveRemoveTrait;
-//    use FindByTermTrait;
+    use FindTrait;
 
     public function __construct(ManagerRegistry $registry)
     {
