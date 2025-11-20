@@ -2,9 +2,10 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'receipt')]
@@ -29,6 +30,7 @@ class Receipt
     private Store $store;
 
     #[ORM\Column(type: 'date')]
+    #[Assert\NotNull(message: 'Data zakupu jest wymagana')]
     private \DateTimeInterface $purchase_date;
 
     #[ORM\Column(name: 'total_amount', type: 'decimal', precision: 14, scale: 2, options: ['default' => 0.00])]
@@ -39,6 +41,7 @@ class Receipt
 
     #[ORM\OneToMany(targetEntity: ReceiptLine::class, mappedBy: 'receipt', cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\OrderBy(['position' => 'ASC'])]
+    #[Assert\Valid]
     private Collection $lines;
 
     public function __construct()
@@ -56,9 +59,10 @@ class Receipt
         return $this->household;
     }
 
-    public function setHousehold(Household $h): self
+    public function setHousehold(Household $household): self
     {
-        $this->household = $h;
+        $this->household = $household;
+
         return $this;
     }
 
@@ -67,9 +71,10 @@ class Receipt
         return $this->store;
     }
 
-    public function setStore(Store $s): self
+    public function setStore(Store $store): self
     {
-        $this->store = $s;
+        $this->store = $store;
+
         return $this;
     }
 
@@ -78,24 +83,27 @@ class Receipt
         return $this->purchase_date;
     }
 
-    public function setPurchaseDate(\DateTimeInterface $d): self
+    public function setPurchaseDate(\DateTimeInterface $purchaseDate): self
     {
-        $this->purchase_date = $d;
+        $this->purchase_date = $purchaseDate;
+
         return $this;
     }
 
     public function getTotalAmount(): float
     {
-        return (float)$this->totalAmount;
+        return (float) $this->totalAmount;
     }
 
-    public function setTotalAmount($value): self
+    public function setTotalAmount(float|string $value): self
     {
-        if (is_string($value)) {
+        if (\is_string($value)) {
             $value = str_replace(',', '.', $value);
         }
-        $v = (float)$value;
+
+        $v = (float) $value;
         $this->totalAmount = number_format($v, 2, '.', '');
+
         return $this;
     }
 
@@ -104,54 +112,52 @@ class Receipt
         return $this->notes;
     }
 
-    public function setNotes(?string $n): self
+    public function setNotes(?string $notes): self
     {
-        $this->notes = $n;
+        $this->notes = $notes;
+
         return $this;
     }
 
-    public function getLines()
+    /**
+     * @return Collection<int, ReceiptLine>
+     */
+    public function getLines(): Collection
     {
         return $this->lines;
     }
-
-//    public function addLine(ReceiptLine $l): self
-//    {
-//        if (!$this->lines->contains($l)) {
-//            $this->lines->add($l);
-//            $l->setReceipt($this);
-//            $this->recalc();
-//        }
-//        return $this;
-//    }
 
     public function addLine(ReceiptLine $line): self
     {
         if (!$this->lines->contains($line)) {
             $line->setReceipt($this);
-            // nadaj kolejną pozycję na końcu
+            // kolejna pozycja na końcu
             $line->setPosition($this->lines->count());
             $this->lines->add($line);
             $this->recalc();
         }
+
         return $this;
     }
 
-    public function removeLine(ReceiptLine $l): self
+    public function removeLine(ReceiptLine $line): self
     {
-        if ($this->lines->removeElement($l)) {
+        if ($this->lines->removeElement($line)) {
             $this->recalc();
         }
+
         return $this;
     }
 
     public function recalc(): void
     {
-        $s = 0.0;
-        foreach ($this->lines as $l) {
-            $s += $l->getLineTotal();
+        $sum = 0.0;
+
+        foreach ($this->lines as $line) {
+            $sum += $line->getLineTotal();
         }
-        $this->totalAmount = number_format($s, 2, '.', '');
+
+        $this->totalAmount = number_format($sum, 2, '.', '');
     }
 
     #[ORM\PrePersist]
@@ -163,6 +169,6 @@ class Receipt
 
     public function __toString(): string
     {
-        return ($this->purchase_date?->format('Y-m-d') ?? '') . ' - ' . (string)($this->store ?? '');
+        return ($this->purchase_date?->format('Y-m-d') ?? '') . ' - ' . (string) ($this->store ?? '');
     }
 }

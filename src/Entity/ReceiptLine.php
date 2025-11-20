@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'receipt_line')]
@@ -19,20 +20,25 @@ class ReceiptLine
 
     #[ORM\ManyToOne(targetEntity: Receipt::class, inversedBy: 'lines')]
     #[ORM\JoinColumn(nullable: false)]
-    private Receipt $receipt;
+    private ?Receipt $receipt = null;
 
     #[ORM\ManyToOne(targetEntity: Product::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private Product $product;
+    #[Assert\NotNull(message: 'Produkt jest wymagany')]
+    private ?Product $product = null;
 
     #[ORM\Column(type: 'decimal', precision: 10, scale: 3, options: ['default' => 1])]
+    #[Assert\NotBlank(message: 'Ilość jest wymagana')]
+    #[Assert\GreaterThan(value: 0, message: 'Ilość musi być większa od zera')]
     private string $quantity = '1.000';
 
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $unit = null;
 
     #[ORM\Column(name: 'unit_price', type: 'decimal', precision: 12, scale: 2)]
-    private string $unitPrice;
+    #[Assert\NotBlank(message: 'Cena jednostkowa jest wymagana')]
+    #[Assert\GreaterThanOrEqual(value: 0, message: 'Cena jednostkowa nie może być ujemna')]
+    private string $unitPrice = '0.00';
 
     #[ORM\Column(name: 'line_total', type: 'decimal', precision: 12, scale: 2, options: ['default' => 0.00])]
     private string $lineTotal = '0.00';
@@ -40,30 +46,32 @@ class ReceiptLine
     #[ORM\Column(type: 'integer')]
     private int $position = 0;
 
-    public function getId()
+    public function getId(): ?string
     {
         return $this->id;
     }
 
-    public function getReceipt(): Receipt
+    public function getReceipt(): ?Receipt
     {
         return $this->receipt;
     }
 
-    public function setReceipt(Receipt $r): self
+    public function setReceipt(?Receipt $receipt): self
     {
-        $this->receipt = $r;
+        $this->receipt = $receipt;
+
         return $this;
     }
 
-    public function getProduct(): Product
+    public function getProduct(): ?Product
     {
         return $this->product;
     }
 
-    public function setProduct(Product $p): self
+    public function setProduct(?Product $product): self
     {
-        $this->product = $p;
+        $this->product = $product;
+
         return $this;
     }
 
@@ -72,9 +80,10 @@ class ReceiptLine
         return $this->quantity;
     }
 
-    public function setQuantity(string $q): self
+    public function setQuantity(string $quantity): self
     {
-        $this->quantity = $q;
+        $this->quantity = $quantity;
+
         return $this;
     }
 
@@ -83,39 +92,44 @@ class ReceiptLine
         return $this->unit;
     }
 
-    public function setUnit(?string $u): self
+    public function setUnit(?string $unit): self
     {
-        $this->unit = $u;
+        $this->unit = $unit;
+
         return $this;
     }
 
     public function getUnitPrice(): float
     {
-        return (float)$this->unitPrice;
+        return (float) $this->unitPrice;
     }
 
-    public function setUnitPrice($value): self
+    public function setUnitPrice(float|string $value): self
     {
-        if (is_string($value)) {
+        if (\is_string($value)) {
             $value = str_replace([' ', "'", ','], ['', '', '.'], $value);
         }
-        $v = (float)$value;
+
+        $v = (float) $value;
         $this->unitPrice = number_format($v, 2, '.', '');
+
         return $this;
     }
 
     public function getLineTotal(): float
     {
-        return (float)$this->lineTotal;
+        return (float) $this->lineTotal;
     }
 
-    public function setLineTotal($value): self
+    public function setLineTotal(float|string $value): self
     {
-        if (is_string($value)) {
+        if (\is_string($value)) {
             $value = str_replace([' ', "'", ','], ['', '', '.'], $value);
         }
-        $v = (float)$value;
+
+        $v = (float) $value;
         $this->lineTotal = number_format($v, 2, '.', '');
+
         return $this;
     }
 
@@ -123,11 +137,12 @@ class ReceiptLine
     #[ORM\PreUpdate]
     public function computeLineTotal(): void
     {
-        // compute using quantity and unitPrice; quantity stored as string decimal
-        $qty = (float)str_replace(',', '.', (string)$this->quantity);
-        $price = (float)$this->unitPrice;
+        // liczymy z quantity + unitPrice
+        $qty = (float) str_replace(',', '.', (string) $this->quantity);
+        $price = (float) $this->unitPrice;
         $total = $qty * $price;
-        // store as formatted string to match Doctrine decimal mapping
+
+        // zapis jako string pod decimal
         $this->lineTotal = number_format($total, 2, '.', '');
     }
 
@@ -136,9 +151,10 @@ class ReceiptLine
         return $this->position;
     }
 
-    public function setPosition(int $p): self
+    public function setPosition(int $position): self
     {
-        $this->position = $p;
+        $this->position = $position;
+
         return $this;
     }
 }
